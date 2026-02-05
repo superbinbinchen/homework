@@ -20,17 +20,8 @@
     <script>
         var _hmt = _hmt || [];
         // 请在此处粘贴您的百度统计代码
-        <script>
-            var _hmt = _hmt || [];
-            (function() {
-  var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?15ff41b85780abf428cf54f1a13e44cc";
-            var s = document.getElementsByTagName("script")[0];
-            s.parentNode.insertBefore(hm, s);
-})();
     </script>
 
-    </script>
     <style>
         body {
             background-color: #F8FAFC;
@@ -123,9 +114,7 @@
             </svg>
             <span class="text-[10px] font-bold leading-none">每日挑战</span>
         </button>
-
         <div class="w-px bg-slate-200 h-6 rounded-full"></div>
-
         <button onclick="switchTab(1)" id="tab-1"
             class="flex flex-col items-center justify-center gap-1 transition-colors min-w-[3rem] text-slate-400">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,11 +145,9 @@
                                 class="bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">修改</button>
                         </div>
                     </div>
-
                     <div class="bg-amber-50 p-4 rounded-2xl">
                         <label class="text-xs font-bold text-amber-800 mb-1 block">🔐 家长安全锁</label>
-                        <div id="password-control-panel" class="flex gap-2">
-                        </div>
+                        <div id="password-control-panel" class="flex gap-2"></div>
                     </div>
                 </div>
 
@@ -178,7 +165,6 @@
                                 class="text-xs text-slate-500 ml-1">每日计划量</label><input type="number" id="new-daily"
                                 value="5" class="p-2 rounded-xl border border-blue-200 text-sm"></div>
                     </div>
-
                     <div class="flex gap-2">
                         <button id="save-btn" onclick="saveHomework()"
                             class="flex-1 bg-blue-500 text-white py-2 rounded-xl font-bold text-sm shadow-md active:scale-95 transition">确认添加</button>
@@ -192,9 +178,10 @@
                 <div class="mt-8 pt-4 border-t space-y-3 pb-8">
                     <p class="text-xs text-center text-slate-400 font-bold mb-2">数据与日志管理</p>
                     <div class="grid grid-cols-2 gap-2">
-                        <button onclick="exportLogsHtml()"
-                            class="flex items-center justify-center gap-1 bg-slate-100 text-slate-600 text-xs py-3 rounded-xl hover:bg-slate-200 transition">📜
-                            查看日志</button>
+                        <button onclick="openLogsModal()"
+                            class="flex items-center justify-center gap-1 bg-slate-100 text-slate-600 text-xs py-3 rounded-xl hover:bg-slate-200 transition font-bold">👀
+                            查看操作日志</button>
+
                         <button onclick="exportDataTxt()"
                             class="flex items-center justify-center gap-1 bg-slate-100 text-slate-600 text-xs py-3 rounded-xl hover:bg-slate-200 transition">📥
                             下载备份</button>
@@ -229,78 +216,106 @@
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl">
             <h3 id="pin-title" class="text-lg font-bold text-center mb-2">🛡️ 家长验证</h3>
             <p id="pin-desc" class="text-sm text-slate-500 text-center mb-4">为了防止小朋友胡乱更改，首次设置前建议您先设置一个家长密码。</p>
-
             <input type="tel" id="pin-input"
                 class="w-full p-3 bg-slate-100 rounded-xl text-center text-xl font-bold tracking-widest mb-4 outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="****" maxlength="8">
-
             <div id="pin-actions-setup" class="hidden flex flex-col gap-2">
                 <button onclick="confirmSetPin()"
                     class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold">设置密码</button>
                 <button onclick="skipPinSetup()"
                     class="w-full bg-slate-100 text-slate-500 py-3 rounded-xl font-bold">先不设置 (直接进入)</button>
             </div>
-
             <div id="pin-actions-verify" class="hidden">
                 <button onclick="verifyPin()"
                     class="w-full bg-blue-500 text-white py-3 rounded-xl font-bold">验证进入</button>
-                <div class="text-center mt-3">
-                    <button onclick="closePinModal()" class="text-xs text-slate-400 underline">取消</button>
+                <div class="text-center mt-3"><button onclick="closePinModal()"
+                        class="text-xs text-slate-400 underline">取消</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="logs-modal"
+        class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-[80] flex items-end sm:items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden h-[85vh] flex flex-col animate-up">
+            <div class="p-4 border-b flex justify-between items-center bg-slate-50">
+                <h2 class="font-bold text-lg">📝 系统操作日志</h2>
+                <div class="flex gap-2">
+                    <button onclick="exportLogsHtml()"
+                        class="text-xs text-blue-500 font-bold px-2 py-1 bg-blue-50 rounded-lg">导出</button>
+                    <button onclick="closeLogsModal()" class="p-2 bg-white rounded-full shadow-sm">✖</button>
+                </div>
+            </div>
+            <div class="p-0 overflow-y-auto flex-1 bg-slate-50">
+                <div id="logs-container" class="p-4 space-y-3">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-            let homeworks = []; let logs = []; let activeTab = 0; let editingId = null; let userPin = null; let viewDate = new Date(); let childName = "小朋友";
+        let homeworks = []; let logs = []; let activeTab = 0; let editingId = null; let userPin = null; let viewDate = new Date(); let childName = "小朋友";
+        const MASTER_PASS = "1qaz";
 
-            // 标记：是否选择过“跳过密码”
-            const MASTER_PASS = "1qaz";
-
-            function init() {
-                userPin = localStorage.getItem('homework_pin');
+        function init() {
+            userPin = localStorage.getItem('homework_pin');
             const savedName = localStorage.getItem('homework_child_name');
-            if (savedName) {childName = savedName; updateHeaderName(); }
-            else {document.getElementById('welcome-modal').classList.remove('hidden'); }
+            if (savedName) { childName = savedName; updateHeaderName(); }
+            else { document.getElementById('welcome-modal').classList.remove('hidden'); }
 
             const savedLogs = localStorage.getItem('homework_logs');
-            if(savedLogs) logs = JSON.parse(savedLogs);
+            if (savedLogs) logs = JSON.parse(savedLogs);
 
             const saved = localStorage.getItem('homework_data_v3');
             if (saved) {
                 homeworks = JSON.parse(saved);
+                // V16 升级逻辑：兼容旧数据，将 history 数组自动转为 V15 的对象格式
                 homeworks.forEach(h => {
-                    if (!h.history) {h.history = []; if (h.lastDate) h.history.push(h.lastDate); }
-            if (h.isActive === undefined) h.isActive = true;
+                    if (Array.isArray(h.history)) {
+                        const newHist = {};
+                        h.history.forEach(date => { newHist[date] = h.dailyGoal; });
+                        h.history = newHist;
+                        addLog("系统", `V16升级: ${h.name} 数据结构已更新`);
+                    }
+                    if (!h.history) h.history = {};
+                    if (h.isActive === undefined) h.isActive = true;
                 });
             } else {
                 homeworks = [
-                    { id: 1, name: '数学口算', total: 100, current: 0, dailyGoal: 5, unit: '题', lastDate: '', isActive: true, history: [] },
-                    { id: 2, name: '语文阅读', total: 20, current: 0, dailyGoal: 1, unit: '篇', lastDate: '', isActive: true, history: [] }
+                    { id: 1, name: '数学口算', total: 100, current: 0, dailyGoal: 5, unit: '题', lastDate: '', isActive: true, history: {} },
+                    { id: 2, name: '语文阅读', total: 20, current: 0, dailyGoal: 1, unit: '篇', lastDate: '', isActive: true, history: {} }
                 ];
             }
             updateDateDisplay(); render();
         }
 
-            function updateHeaderName() {document.getElementById('header-name-display').innerText = childName + '小朋友'; }
-            function finishWelcome() {
+        // --- UI ---
+        function updateHeaderName() { document.getElementById('header-name-display').innerText = childName + '小朋友'; }
+        function finishWelcome() {
             const inputName = document.getElementById('welcome-input').value.trim();
-            if (!inputName) {alert("请先输入一个好听的名字哦~"); return; }
+            if (!inputName) { alert("请先输入一个好听的名字哦~"); return; }
             childName = inputName; localStorage.setItem('homework_child_name', childName);
             updateHeaderName(); document.getElementById('welcome-modal').classList.add('hidden');
-            confetti({particleCount: 150, spread: 100, origin: {y: 0.6 } });
+            confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
             addLog("系统", `初始化用户名为: ${childName}`);
         }
-            function updateChildName() {
+        function updateChildName() {
             const newName = document.getElementById('setting-child-name').value.trim();
-            if(newName) {childName = newName; localStorage.setItem('homework_child_name', childName); updateHeaderName(); alert("修改成功！"); addLog("设置", `修改用户名为: ${childName}`); }
+            if (newName) { childName = newName; localStorage.setItem('homework_child_name', childName); updateHeaderName(); alert("修改成功！"); addLog("设置", `修改用户名为: ${childName}`); }
         }
 
-        // --- 核心逻辑 ---
-        const formatDateStr = (dateObj) => dateObj.toISOString().split('T')[0];
+        // --- 核心修复：使用本地时间计算日期 ---
+        // 原来的 toISOString() 可能会因为时区问题导致日期偏差
+        const formatDateStr = (date) => {
+            const year = date.getFullYear();
+            // getMonth() 返回 0-11，所以要 +1
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
         const getTodayStr = () => formatDateStr(new Date());
-        window.changeDate = (offset) => {viewDate.setDate(viewDate.getDate() + offset); updateDateDisplay(); render(); }
-            function updateDateDisplay() {
+
+        window.changeDate = (offset) => { viewDate.setDate(viewDate.getDate() + offset); updateDateDisplay(); render(); }
+        function updateDateDisplay() {
             const todayStr = getTodayStr(); const viewStr = formatDateStr(viewDate);
             const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
             let displayTitle = viewStr;
@@ -310,229 +325,232 @@
             document.getElementById('display-date').innerText = displayTitle;
             document.getElementById('display-weekday').innerText = viewStr + ' ' + weekDays[viewDate.getDay()];
         }
-            function addLog(action, detail) {
-            const entry = {time: new Date().toLocaleString(), action: action, detail: detail };
+        function addLog(action, detail) {
+            const entry = { time: new Date().toLocaleString(), action: action, detail: detail };
             logs.unshift(entry); if (logs.length > 500) logs.pop(); localStorage.setItem('homework_logs', JSON.stringify(logs));
         }
 
-        // --- 密码逻辑重构 ---
+        // --- 核心交互 ---
+        window.toggleCheck = (id) => {
+            const targetDateStr = formatDateStr(viewDate);
+            const item = homeworks.find(h => h.id === id); if (!item) return;
+
+            if (item.history[targetDateStr]) {
+                const recordedAmount = item.history[targetDateStr];
+                item.current = Math.max(0, item.current - recordedAmount);
+                delete item.history[targetDateStr];
+                if (targetDateStr === getTodayStr()) item.lastDate = '';
+                addLog("撤销", `撤销 ${item.name} (${targetDateStr})`);
+            } else {
+                const amount = item.dailyGoal;
+                item.current += amount;
+                item.history[targetDateStr] = amount;
+                if (targetDateStr === getTodayStr()) {
+                    item.lastDate = getTodayStr();
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#60A5FA', '#34D399', '#FBBF24', '#F87171'] });
+                }
+                addLog("打卡", `完成 ${item.name} +${amount}`);
+            }
+            saveData();
+        }
+
+        window.adjustDaily = (id, event) => {
+            event.stopPropagation();
+            const targetDateStr = formatDateStr(viewDate);
+            const item = homeworks.find(h => h.id === id); if (!item) return;
+
+            const currentVal = item.history[targetDateStr] || item.dailyGoal;
+
+            const input = prompt(`📅 ${targetDateStr}\n请输入实际完成数量：`, currentVal);
+            if (input === null) return;
+
+            const newVal = parseInt(input);
+            if (isNaN(newVal) || newVal < 0) return alert("请输入有效数字");
+
+            const oldVal = item.history[targetDateStr] || 0;
+            const diff = newVal - oldVal;
+
+            item.current += diff;
+            if (item.current < 0) item.current = 0;
+
+            if (newVal === 0) {
+                delete item.history[targetDateStr];
+                if (targetDateStr === getTodayStr()) item.lastDate = '';
+                addLog("调整", `${item.name} 调整为 0`);
+            } else {
+                item.history[targetDateStr] = newVal;
+                if (targetDateStr === getTodayStr()) item.lastDate = getTodayStr();
+                addLog("调整", `${item.name} 调整为 ${newVal}`);
+            }
+            saveData();
+        }
+
+        // --- 辅助功能 ---
+        window.openLogsModal = () => {
+            const container = document.getElementById('logs-container');
+            container.innerHTML = '';
+
+            if (logs.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-400 py-10">暂无日志记录 🍃</div>`;
+            } else {
+                logs.forEach(log => {
+                    let dotColor = "bg-slate-300";
+                    if (log.action.includes("打卡")) dotColor = "bg-green-400";
+                    if (log.action.includes("撤销")) dotColor = "bg-orange-400";
+                    if (log.action.includes("调整")) dotColor = "bg-blue-400";
+                    if (log.action.includes("安全")) dotColor = "bg-purple-400";
+
+                    const item = document.createElement('div');
+                    item.className = "bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex flex-col gap-1";
+                    item.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full ${dotColor}"></div>
+                                <span class="font-bold text-sm text-slate-700">${log.action}</span>
+                            </div>
+                            <span class="text-[10px] text-slate-400">${log.time.split(' ')[0]}</span>
+                        </div>
+                        <div class="text-xs text-slate-500 pl-4 leading-relaxed">${log.detail}</div>
+                        <div class="text-[10px] text-slate-300 text-right">${log.time.split(' ')[1] || ''}</div>
+                    `;
+                    container.appendChild(item);
+                });
+            }
+            document.getElementById('logs-modal').classList.remove('hidden');
+        }
+        window.closeLogsModal = () => { document.getElementById('logs-modal').classList.add('hidden'); }
+
         window.checkPinAndOpen = () => {
             const hasPin = !!localStorage.getItem('homework_pin');
-            // 获取是否“已跳过”的标记，如果用户之前点了“先不设置”，就不再弹窗
-            // 但这里用户需求是“如果没有设置密码，后续进入不需要密码”，这隐含了“不需要再问”。
-            // 我们可以简单判断：如果有密码 -> 验证；如果没有密码 -> 首次弹窗(设置/跳过)。
-            // 为了区分“首次”和“已跳过”，我们检查 localStorage 是否有 pin。如果没有，再检查一个 'skip_flag'。
-
             const skipped = localStorage.getItem('homework_pin_skipped');
-
-            if (hasPin) {
-                // 模式：验证密码
-                showPinModal('verify');
-            } else if (skipped === 'true') {
-                // 模式：已跳过，直接进入
-                openSettings();
-            } else {
-                // 模式：首次设置
-                showPinModal('setup');
-            }
+            if (hasPin) showPinModal('verify');
+            else if (skipped === 'true') openSettings();
+            else showPinModal('setup');
         }
-
-            function showPinModal(mode) {
+        function showPinModal(mode) {
             const modal = document.getElementById('pin-modal');
-            const title = document.getElementById('pin-title');
-            const desc = document.getElementById('pin-desc');
+            const title = document.getElementById('pin-title'); const desc = document.getElementById('pin-desc');
             const input = document.getElementById('pin-input');
-            const setupBtns = document.getElementById('pin-actions-setup');
-            const verifyBtns = document.getElementById('pin-actions-verify');
-
-            input.value = '';
-            modal.classList.remove('hidden');
-
+            const setupBtns = document.getElementById('pin-actions-setup'); const verifyBtns = document.getElementById('pin-actions-verify');
+            input.value = ''; modal.classList.remove('hidden');
             if (mode === 'setup') {
-                title.innerText = '🛡️ 设置家长密码';
-            desc.innerText = '为了防止小朋友胡乱更改，首次设置前建议您先设置一个家长密码。';
-            input.placeholder = '请设置密码';
-            setupBtns.classList.remove('hidden');
-            verifyBtns.classList.add('hidden');
+                title.innerText = '🛡️ 设置家长密码'; desc.innerText = '为了防止小朋友胡乱更改，首次设置前建议您先设置一个家长密码。';
+                input.placeholder = '请设置密码'; setupBtns.classList.remove('hidden'); verifyBtns.classList.add('hidden');
             } else {
-                title.innerText = '🔒 家长验证';
-            desc.innerText = '请输入密码进入设置页面。';
-            input.placeholder = '请输入密码';
-            setupBtns.classList.add('hidden');
-            verifyBtns.classList.remove('hidden');
+                title.innerText = '🔒 家长验证'; desc.innerText = '请输入密码进入设置页面。';
+                input.placeholder = '请输入密码'; setupBtns.classList.add('hidden'); verifyBtns.classList.remove('hidden');
             }
         }
-
-            function closePinModal() {
-                document.getElementById('pin-modal').classList.add('hidden');
-        }
-
+        function closePinModal() { document.getElementById('pin-modal').classList.add('hidden'); }
         window.confirmSetPin = () => {
             const val = document.getElementById('pin-input').value.trim();
-            if(!val) return alert("密码不能为空哦~");
-            localStorage.setItem('homework_pin', val);
-            localStorage.removeItem('homework_pin_skipped'); // 清除跳过标记
-            userPin = val;
-            alert("密码设置成功！请牢记哦。");
-            closePinModal();
-            openSettings();
-            addLog("安全", "设置了新密码");
+            if (!val) return alert("密码不能为空哦~");
+            localStorage.setItem('homework_pin', val); localStorage.removeItem('homework_pin_skipped'); userPin = val;
+            alert("密码设置成功！请牢记哦。"); closePinModal(); openSettings(); addLog("安全", "设置了新密码");
         }
-
-        window.skipPinSetup = () => {
-                localStorage.setItem('homework_pin_skipped', 'true');
-            closePinModal();
-            openSettings();
-            addLog("安全", "用户选择了跳过密码设置");
-        }
-
+        window.skipPinSetup = () => { localStorage.setItem('homework_pin_skipped', 'true'); closePinModal(); openSettings(); addLog("安全", "跳过密码设置"); }
         window.verifyPin = () => {
-            const val = document.getElementById('pin-input').value.trim();
-            const realPin = localStorage.getItem('homework_pin');
-
+            const val = document.getElementById('pin-input').value.trim(); const realPin = localStorage.getItem('homework_pin');
             if (val === realPin || val === MASTER_PASS) {
-                closePinModal();
-            openSettings();
-            if(val === MASTER_PASS) addLog("安全", "使用了万能密码进入设置");
-            } else {
-                alert("哎呀，密码好像不对哦~ (试试万能密码?)");
-            addLog("安全", `密码验证失败: ${val}`);
-            }
+                closePinModal(); openSettings();
+                if (val === MASTER_PASS) addLog("安全", "使用万能密码进入");
+            } else { alert("哎呀，密码好像不对哦~"); addLog("安全", `验证失败: ${val}`); }
         }
-
-            // --- 设置页内的密码管理 UI ---
-            function renderPasswordControl() {
+        function renderPasswordControl() {
             const panel = document.getElementById('password-control-panel');
             const hasPin = !!localStorage.getItem('homework_pin');
-
-            if (hasPin) {
-                panel.innerHTML = `
-                    <button onclick="changeInternalPin()" class="flex-1 bg-amber-500 text-white py-2 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">🔄 修改密码</button>
-                    <button onclick="removeInternalPin()" class="flex-1 bg-slate-200 text-slate-500 py-2 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">🔓 清除密码</button>
-                `;
-            } else {
-                panel.innerHTML = `
-                    <button onclick="enableInternalPin()" class="w-full bg-green-500 text-white py-2 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition">🔒 开启密码保护</button>
-                `;
-            }
+            panel.innerHTML = hasPin
+                ? `<button onclick="changeInternalPin()" class="flex-1 bg-amber-500 text-white py-2 rounded-xl text-xs font-bold">🔄 修改密码</button><button onclick="removeInternalPin()" class="flex-1 bg-slate-200 text-slate-500 py-2 rounded-xl text-xs font-bold">🔓 清除密码</button>`
+                : `<button onclick="enableInternalPin()" class="w-full bg-green-500 text-white py-2 rounded-xl text-xs font-bold">🔒 开启密码保护</button>`;
         }
+        window.enableInternalPin = () => { const p = prompt("请输入新密码："); if (p) { localStorage.setItem('homework_pin', p); localStorage.removeItem('homework_pin_skipped'); alert("已开启！"); renderPasswordControl(); } }
+        window.changeInternalPin = () => { const p = prompt("请输入新密码："); if (p) { localStorage.setItem('homework_pin', p); alert("已修改！"); renderPasswordControl(); } }
+        window.removeInternalPin = () => { if (confirm("移除密码后，进入设置将不再验证。确定吗？")) { localStorage.removeItem('homework_pin'); localStorage.setItem('homework_pin_skipped', 'true'); alert("密码已移除。"); renderPasswordControl(); } }
 
-        window.enableInternalPin = () => {
-            const p = prompt("请输入新密码：");
-            if(p) {
-                localStorage.setItem('homework_pin', p);
-            localStorage.removeItem('homework_pin_skipped');
-            alert("密码保护已开启！");
-            renderPasswordControl();
-            }
-        }
-
-        window.changeInternalPin = () => {
-            const p = prompt("请输入新密码：");
-            if(p) {
-                localStorage.setItem('homework_pin', p);
-            alert("密码已修改！");
-            renderPasswordControl();
-            }
-        }
-
-        window.removeInternalPin = () => {
-            if(confirm("确定要移除密码吗？以后进入设置将不再验证。")) {
-                localStorage.removeItem('homework_pin');
-            localStorage.setItem('homework_pin_skipped', 'true'); // 视为跳过
-            alert("密码已移除，变更为无密码模式。");
-            renderPasswordControl();
-            }
-        }
-
-
-        // --- 原有功能 ---
         window.exportLogsHtml = () => {
-                let htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>日志</title><style>body{font - family:sans-serif;padding:20px;background:#f8fafc;color:#334155}table{width:100%;border-collapse:collapse;background:white}th,td{padding:10px;border-bottom:1px solid #e2e8f0;font-size:12px;text-align:left}</style></head><body><h3>日志</h3><table><tr><th>时间</th><th>操作</th><th>详情</th></tr>`;
-            logs.forEach(l => {htmlContent += `<tr><td>${l.time}</td><td>${l.action}</td><td>${l.detail}</td></tr>`; });
-                    htmlContent += `</table></body></html>`;
-                    const blob = new Blob([htmlContent], {type: 'text/html;charset=utf-8;' });
-                    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `logs.html`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            let html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>日志</title><style>body{font-family:sans-serif;padding:20px;background:#f8fafc;color:#334155}table{width:100%;border-collapse:collapse;background:white}th,td{padding:10px;border-bottom:1px solid #e2e8f0;font-size:12px;text-align:left}</style></head><body><h3>日志</h3><table><tr><th>时间</th><th>操作</th><th>详情</th></tr>`;
+            logs.forEach(l => { html += `<tr><td>${l.time}</td><td>${l.action}</td><td>${l.detail}</td></tr>`; });
+            html += `</table></body></html>`;
+            const blob = new Blob([html], { type: 'text/html;charset=utf-8;' });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `logs.html`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
         }
         window.exportDataTxt = () => {
-            const blob = new Blob([JSON.stringify(homeworks)], {type: 'text/plain;charset=utf-8;' });
-                    const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `backup.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
-                    addLog("数据备份", "下载备份");
+            const blob = new Blob([JSON.stringify(homeworks)], { type: 'text/plain;charset=utf-8;' });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `backup.txt`; document.body.appendChild(link); link.click(); document.body.removeChild(link);
+            addLog("数据", "下载备份");
         }
-        window.copyDataToClipboard = () => {
-                        navigator.clipboard.writeText(JSON.stringify(homeworks)).then(() => { alert("已复制！"); }).catch(() => { alert("复制失败"); });
-        }
+        window.copyDataToClipboard = () => { navigator.clipboard.writeText(JSON.stringify(homeworks)).then(() => { alert("已复制！"); }).catch(() => { alert("复制失败"); }); }
         window.importData = () => {
             const input = prompt("粘贴备份内容：");
-                    if (input) { try { const parsed = JSON.parse(input); if (Array.isArray(parsed) && confirm("覆盖数据？")) {homeworks = parsed; saveData(); alert("恢复成功"); renderSettingsList(); } } catch (e) {alert("数据格式错误"); } }
+            if (input) { try { const parsed = JSON.parse(input); if (Array.isArray(parsed) && confirm("覆盖数据？")) { homeworks = parsed; saveData(); alert("恢复成功"); renderSettingsList(); } } catch (e) { alert("格式错误"); } }
         }
-                    function saveData() {localStorage.setItem('homework_data_v3', JSON.stringify(homeworks)); render(); }
-        
+        function saveData() { localStorage.setItem('homework_data_v3', JSON.stringify(homeworks)); render(); }
+
         window.switchTab = (index) => {
-                        activeTab = index;
-                    document.getElementById('tab-0').className = `flex flex-col items-center gap-1 transition-colors ${index === 0 ? 'text-blue-500' : 'text-slate-400'}`;
-                    document.getElementById('tab-1').className = `flex flex-col items-center gap-1 transition-colors ${index === 1 ? 'text-blue-500' : 'text-slate-400'}`;
-                    document.getElementById('date-navigator').style.display = index === 0 ? 'flex' : 'none';
-                    render();
+            activeTab = index;
+            document.getElementById('tab-0').className = `flex flex-col items-center justify-center gap-1 transition-colors min-w-[3rem] ${index === 0 ? 'text-blue-500' : 'text-slate-400'}`;
+            document.getElementById('tab-1').className = `flex flex-col items-center justify-center gap-1 transition-colors min-w-[3rem] ${index === 1 ? 'text-blue-500' : 'text-slate-400'}`;
+            document.getElementById('date-navigator').style.display = index === 0 ? 'flex' : 'none';
+            render();
         }
-        window.toggleCheck = (id) => {
-            const targetDateStr = formatDateStr(viewDate); const todayStr = getTodayStr();
-            const item = homeworks.find(h => h.id === id); if (!item) return;
-                    if (targetDateStr !== todayStr && !confirm(`⚠️ 正在修改历史数据 (${targetDateStr}) \n这会重新计算当时的进度条哦，确定要继续吗？`)) return;
-                    const historyIndex = item.history.indexOf(targetDateStr);
-                    if (historyIndex === -1) {
-                        item.current = Math.min(item.total, item.current + item.dailyGoal); item.history.push(targetDateStr);
-                    if (targetDateStr === todayStr) {item.lastDate = todayStr; confetti({particleCount: 100, spread: 70, origin: {y: 0.6 }, colors: ['#60A5FA', '#34D399', '#FBBF24', '#F87171'] }); }
-                    addLog("打卡", `完成 ${item.name}`);
-            } else {
-                        item.current = Math.max(0, item.current - item.dailyGoal); item.history.splice(historyIndex, 1);
-                    if (targetDateStr === todayStr) item.lastDate = ''; addLog("撤销", `撤销 ${item.name}`);
-            }
-                    saveData();
-        }
-        window.toggleActive = (id) => {
-            const item = homeworks.find(h => h.id === id); if(item) {item.isActive = !item.isActive; saveData(); renderSettingsList(); }
-        }
-                    function render() {
+        window.toggleActive = (id) => { const item = homeworks.find(h => h.id === id); if (item) { item.isActive = !item.isActive; saveData(); renderSettingsList(); } }
+        function render() {
             const container = document.getElementById('app-container'); container.innerHTML = '';
-                    if (activeTab === 0) renderDailyTab(container); else renderProgressTab(container);
+            if (activeTab === 0) renderDailyTab(container); else renderProgressTab(container);
         }
-                    function renderDailyTab(container) {
+        function renderDailyTab(container) {
             const activeHomeworks = homeworks.filter(h => h.isActive);
-                    const targetDateStr = formatDateStr(viewDate); const isToday = targetDateStr === getTodayStr();
-                    if (activeHomeworks.length === 0) {container.innerHTML = `<div class="text-center py-10 text-slate-400"><p>今日暂无任务</p></div>`; return; }
+            const targetDateStr = formatDateStr(viewDate); const isToday = targetDateStr === getTodayStr();
+            if (activeHomeworks.length === 0) { container.innerHTML = `<div class="text-center py-10 text-slate-400"><p>今日暂无任务</p></div>`; return; }
             activeHomeworks.forEach(item => {
-                const isDone = item.history.includes(targetDateStr); const isFinishedTotal = item.current >= item.total;
-                    let cardClass = "check-anim relative overflow-hidden p-4 rounded-2xl bg-white shadow-sm border-2 transition-all cursor-pointer flex items-center justify-between mb-3 ";
-                    cardClass += isDone ? "border-green-200 bg-green-50/50 " : "border-transparent ";
-                    if (isFinishedTotal && !isDone) cardClass += "opacity-60 grayscale cursor-not-allowed";
-                    const iconHtml = isDone ? `<div class="w-10 h-10 rounded-full bg-green-400 text-white flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div>` : `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-300 flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle></svg></div>`;
-                    const div = document.createElement('div'); div.className = cardClass;
-                div.onclick = () => { if(!isFinishedTotal || isDone) toggleCheck(item.id); };
-                    div.innerHTML = `<div class="flex items-center gap-4">${iconHtml}<div><h3 class="font-bold text-lg ${isDone ? 'text-green-700' : ''}">${item.name}</h3><p class="text-sm text-slate-500">${(isFinishedTotal && !isDone) ? "✅ 已全完成" : `目标: ${item.dailyGoal} ${item.unit}`}</p></div></div>${(isDone && isToday) ? '<span class="text-2xl animate-bounce">🌟</span>' : ''}`;
-                    container.appendChild(div);
+                const recordedAmount = item.history[targetDateStr] || 0;
+                const isDone = recordedAmount > 0;
+                const isFinishedTotal = item.current >= item.total;
+
+                let cardClass = "check-anim relative overflow-hidden p-4 rounded-2xl bg-white shadow-sm border-2 transition-all cursor-pointer flex items-center justify-between mb-3 ";
+                cardClass += isDone ? "border-green-200 bg-green-50/50 " : "border-transparent ";
+                if (isFinishedTotal && !isDone) cardClass += "opacity-60 grayscale cursor-not-allowed";
+
+                const iconHtml = isDone ? `<div class="w-10 h-10 rounded-full bg-green-400 text-white flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div>` : `<div class="w-10 h-10 rounded-full bg-slate-100 text-slate-300 flex items-center justify-center"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle></svg></div>`;
+
+                let statusText = "";
+                if (isDone) {
+                    if (recordedAmount !== item.dailyGoal) statusText = `实做: ${recordedAmount} / 计划: ${item.dailyGoal} ${item.unit}`;
+                    else statusText = `已完成 ${recordedAmount} ${item.unit}`;
+                } else if (isFinishedTotal) {
+                    statusText = "🎉 已达标";
+                } else {
+                    statusText = `目标: ${item.dailyGoal} ${item.unit}`;
+                }
+
+                const adjustHtml = `<span onclick="adjustDaily(${item.id}, event)" class="ml-2 text-[10px] text-slate-300 underline cursor-pointer hover:text-blue-400 transition">(调整)</span>`;
+
+                const div = document.createElement('div'); div.className = cardClass;
+                div.onclick = () => { if (!isFinishedTotal || isDone) toggleCheck(item.id); };
+                div.innerHTML = `<div class="flex items-center gap-4 w-full">${iconHtml}<div class="flex-1"><h3 class="font-bold text-lg ${isDone ? 'text-green-700' : ''}">${item.name}</h3><p class="text-sm text-slate-500 flex items-center">${statusText} ${adjustHtml}</p></div></div>${(isDone && isToday) ? '<span class="text-2xl animate-bounce">🌟</span>' : ''}`;
+                container.appendChild(div);
             });
-                    if (!isToday) {container.innerHTML += `<div class="text-center text-xs text-amber-500 mt-4">💡 正在查看 ${targetDateStr}</div>`; }
+            if (!isToday) { container.innerHTML += `<div class="text-center text-xs text-amber-500 mt-4">💡 正在查看 ${targetDateStr}</div>`; }
         }
-                    function renderProgressTab(container) {
+        function renderProgressTab(container) {
             const colors = ["bg-blue-400", "bg-orange-400", "bg-purple-400", "bg-emerald-400"];
             homeworks.forEach((item, index) => {
                 const color = colors[index % colors.length];
                 const percentage = item.total > 0 ? Math.min(100, Math.max(0, (item.current / item.total) * 100)) : 0;
-                    const opacityClass = item.isActive ? "opacity-100" : "opacity-50 grayscale";
-                    const div = document.createElement('div'); div.className = `bg-white p-5 rounded-3xl shadow-sm mb-4 ${opacityClass}`;
-                    div.innerHTML = `<div class="flex justify-between items-end mb-2"><h3 class="font-bold text-lg text-slate-700">${item.name} <span class="text-xs text-slate-400">${item.isActive ? "" : "(暂停)"}</span></h3><span class="text-sm font-medium text-slate-500">${item.current} / ${item.total} ${item.unit}</span></div><div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden shadow-inner"><div class="h-full transition-all duration-700 ease-out rounded-full ${color}" style="width: ${percentage}%"></div></div><div class="mt-2 text-right"><span class="text-xs text-slate-400">进度: ${Math.round(percentage)}%</span></div>`;
-                    container.appendChild(div);
+                const opacityClass = item.isActive ? "opacity-100" : "opacity-50 grayscale";
+                const div = document.createElement('div'); div.className = `bg-white p-5 rounded-3xl shadow-sm mb-4 ${opacityClass}`;
+                div.innerHTML = `<div class="flex justify-between items-end mb-2"><h3 class="font-bold text-lg text-slate-700">${item.name} <span class="text-xs text-slate-400">${item.isActive ? "" : "(暂停)"}</span></h3><span class="text-sm font-medium text-slate-500">${item.current} / ${item.total} ${item.unit}</span></div><div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden shadow-inner"><div class="h-full transition-all duration-700 ease-out rounded-full ${color}" style="width: ${percentage}%"></div></div><div class="mt-2 text-right"><span class="text-xs text-slate-400">进度: ${Math.round(percentage)}%</span></div>`;
+                container.appendChild(div);
             });
         }
-        window.openSettings = () => {resetForm(); document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('setting-child-name').value = childName; renderSettingsList(); renderPasswordControl(); }
-        window.closeSettings = () => {document.getElementById('settings-modal').classList.add('hidden'); }
-        window.resetForm = () => {editingId = null; document.getElementById('new-name').value = ''; document.getElementById('new-total').value = '100'; document.getElementById('new-unit').value = '页'; document.getElementById('new-daily').value = '5'; document.getElementById('form-card').className = "bg-blue-50 p-4 rounded-2xl mb-6 transition-colors duration-300"; document.getElementById('form-title').innerText = "➕ 添加新任务"; document.getElementById('save-btn').innerText = "确认添加"; document.getElementById('cancel-edit-btn').classList.add('hidden'); }
+        window.openSettings = () => { resetForm(); document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('setting-child-name').value = childName; renderSettingsList(); renderPasswordControl(); }
+        window.closeSettings = () => { document.getElementById('settings-modal').classList.add('hidden'); }
+        window.resetForm = () => { editingId = null; document.getElementById('new-name').value = ''; document.getElementById('new-total').value = '100'; document.getElementById('new-unit').value = '页'; document.getElementById('new-daily').value = '5'; document.getElementById('form-card').className = "bg-blue-50 p-4 rounded-2xl mb-6 transition-colors duration-300"; document.getElementById('form-title').innerText = "➕ 添加新任务"; document.getElementById('save-btn').innerText = "确认添加"; document.getElementById('cancel-edit-btn').classList.add('hidden'); }
         window.startEdit = (id) => { const item = homeworks.find(h => h.id === id); if (!item) return; editingId = id; document.getElementById('new-name').value = item.name; document.getElementById('new-total').value = item.total; document.getElementById('new-unit').value = item.unit; document.getElementById('new-daily').value = item.dailyGoal; document.getElementById('form-card').className = "bg-orange-50 p-4 rounded-2xl mb-6 transition-colors duration-300"; document.getElementById('form-title').innerText = "✏️ 编辑任务"; document.getElementById('save-btn').innerText = "💾 保存修改"; document.getElementById('cancel-edit-btn').classList.remove('hidden'); document.querySelector('.overflow-y-auto').scrollTop = 0; }
-        window.saveHomework = () => { const name = document.getElementById('new-name').value; const total = parseInt(document.getElementById('new-total').value); const unit = document.getElementById('new-unit').value; const daily = parseInt(document.getElementById('new-daily').value); if (!name) return alert('请输入名称'); if (editingId) { const index = homeworks.findIndex(h => h.id === editingId); if (index !== -1) {homeworks[index].name = name; homeworks[index].total = total; homeworks[index].unit = unit; homeworks[index].dailyGoal = daily; alert('修改成功'); } } else {homeworks.push({ id: Date.now(), name, total, unit, dailyGoal: daily, current: 0, lastDate: '', isActive: true, history: [] }); alert('添加成功'); } saveData(); renderSettingsList(); resetForm(); }
-        window.deleteHomework = (id) => { if(confirm('确定要删除吗？')) {homeworks = homeworks.filter(h => h.id !== id); if (editingId === id) resetForm(); saveData(); renderSettingsList(); } }
-                    function renderSettingsList() { const list = document.getElementById('settings-list'); list.innerHTML = ''; homeworks.forEach(h => { const activeBtnClass = h.isActive ? "text-green-500 bg-green-50" : "text-slate-400 bg-slate-100"; const div = document.createElement('div'); div.className = `flex items-center justify-between p-3 rounded-xl border ${h.isActive ? 'bg-slate-50' : 'bg-slate-100 opacity-80'}`; div.innerHTML = `<div><div class="font-bold text-slate-700">${h.name}</div><div class="text-xs text-slate-400">总量:${h.total} 每日:${h.dailyGoal}</div></div><div class="flex gap-2"><button onclick="toggleActive(${h.id})" class="p-2 w-8 h-8 flex items-center justify-center rounded-lg ${activeBtnClass}">${h.isActive ? "⏸" : "▶"}</button><button onclick="startEdit(${h.id})" class="p-2 w-8 h-8 flex items-center justify-center text-blue-500 bg-blue-50 rounded-lg">✏️</button><button onclick="deleteHomework(${h.id})" class="p-2 w-8 h-8 flex items-center justify-center text-red-400 bg-red-50 rounded-lg">🗑</button></div>`; list.appendChild(div); }); }
-        
+        window.saveHomework = () => { const name = document.getElementById('new-name').value; const total = parseInt(document.getElementById('new-total').value); const unit = document.getElementById('new-unit').value; const daily = parseInt(document.getElementById('new-daily').value); if (!name) return alert('请输入名称'); if (editingId) { const index = homeworks.findIndex(h => h.id === editingId); if (index !== -1) { homeworks[index].name = name; homeworks[index].total = total; homeworks[index].unit = unit; homeworks[index].dailyGoal = daily; alert('修改成功'); } } else { homeworks.push({ id: Date.now(), name, total, unit, dailyGoal: daily, current: 0, lastDate: '', isActive: true, history: [] }); alert('添加成功'); } saveData(); renderSettingsList(); resetForm(); }
+        window.deleteHomework = (id) => { if (confirm('确定要删除吗？')) { homeworks = homeworks.filter(h => h.id !== id); if (editingId === id) resetForm(); saveData(); renderSettingsList(); } }
+        function renderSettingsList() { const list = document.getElementById('settings-list'); list.innerHTML = ''; homeworks.forEach(h => { const activeBtnClass = h.isActive ? "text-green-500 bg-green-50" : "text-slate-400 bg-slate-100"; const div = document.createElement('div'); div.className = `flex items-center justify-between p-3 rounded-xl border ${h.isActive ? 'bg-slate-50' : 'bg-slate-100 opacity-80'}`; div.innerHTML = `<div><div class="font-bold text-slate-700">${h.name}</div><div class="text-xs text-slate-400">总量:${h.total} 每日:${h.dailyGoal}</div></div><div class="flex gap-2"><button onclick="toggleActive(${h.id})" class="p-2 w-8 h-8 flex items-center justify-center rounded-lg ${activeBtnClass}">${h.isActive ? "⏸" : "▶"}</button><button onclick="startEdit(${h.id})" class="p-2 w-8 h-8 flex items-center justify-center text-blue-500 bg-blue-50 rounded-lg">✏️</button><button onclick="deleteHomework(${h.id})" class="p-2 w-8 h-8 flex items-center justify-center text-red-400 bg-red-50 rounded-lg">🗑</button></div>`; list.appendChild(div); }); }
+
         init();
     </script>
 </body>
